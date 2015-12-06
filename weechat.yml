@@ -1,0 +1,17 @@
+---
+- hosts: ro
+  vars:
+    user: napalm
+    makedir: /tmp/{{ user }}/weechat/
+    cores: 2
+  tasks:
+    - name: Update weechat repo 
+      git: repo=https://github.com/weechat/weechat.git dest={{ makedir }}
+    - name: Running cmake
+      shell: cmake -DCMAKE_INSTALL_PREFIX=/home/{{ user }}/usr chdir={{ makedir }}
+    - name: Compiling with make
+      shell: make --jobs={{cores}} chdir={{ makedir }}
+    - name: Installing via make install
+      shell: make install chdir={{ makedir }}
+    - name: Clean up make files
+      file: path={{ makedir }} state=directory state=absent
