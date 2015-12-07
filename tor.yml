@@ -1,0 +1,8 @@
+---
+- hosts: ro
+  sudo: true
+  tasks:
+    - name: Update Tor to latest version
+      apt: name=tor state=latest force=true
+    - name: Ensure Tor is running
+      service: name=tor state=started
