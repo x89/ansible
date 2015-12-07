@@ -10,4 +10,4 @@
     - name: Ensure praw.ini is correct
       copy: src=/home/{{ user }}/ansible/praw.ini dest=/home/{{ user }}/Shreddit/praw.ini owner={{ user }} group={{ user }} mode=0600
     - name: Ensure Shreddit cron job
-      cron: user={{ user }} name="Shreddit" minute="0" job="cd /home/{{ user }}/Shreddit && bash -c 'source bin/activate && python shreddit.py'"
+      cron: user={{ user }} name="Shreddit" minute="0" job="cd /home/{{ user }}/Shreddit && bash -c 'source bin/activate && python shreddit.py' 2>/dev/null"
