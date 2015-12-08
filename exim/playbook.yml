@@ -1,0 +1,12 @@
+---
+- hosts: ro 
+  become: true 
+  vars:
+    hostname: vaunt.eu
+    tls: true
+    aliases_file: /etc/aliases
+    tls_only: false
+  tasks:
+    - include: 'tasks/main.yml'
+  handlers:
+    - include: 'handlers/main.yml'

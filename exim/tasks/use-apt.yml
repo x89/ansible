@@ -1,0 +1,23 @@
+- name: ensure Exim is present
+  apt: name=exim4 state=present
+
+- name: ensure Exim is enabled and started
+  service: name=exim4 enabled=yes state=started
+
+- name: Update config
+  template: src=templates/exim.conf.j2 dest=/etc/exim4/exim4.conf
+
+- name: Check that exim config passes syntax test 
+  command: exim -bV
+
+- name: Reload exim
+  service: name=exim4 state=reloaded
+
+- name: Correct perms on /etc/exim4
+  file: path=/etc/exim4 state=directory owner=root group=root recurse=yes
+
+- name: Correct exim.crt permission
+  file: path=/etc/exim4/keys/exim.crt state=file owner=Debian-exim group=root mode=0400
+
+- name: Correct exim.key permission
+  file: path=/etc/exim4/keys/exim.key state=file owner=Debian-exim group=root mode=0400
