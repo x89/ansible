@@ -10,9 +10,6 @@
 - name: Check that exim config passes syntax test 
   command: exim -bV
 
-- name: Reload exim
-  service: name=exim4 state=reloaded
-
 - name: Correct perms on /etc/exim4
   file: path=/etc/exim4 state=directory owner=root group=root recurse=yes
 
@@ -21,3 +18,9 @@
 
 - name: Correct exim.key permission
   file: path=/etc/exim4/keys/exim.key state=file owner=Debian-exim group=root mode=0400
+
+- name: Copy newest aliases file
+  copy: src=files/aliases dest={{ aliases_file }} mode=0640 owner=Debian-exim
+
+- name: Reload exim
+  service: name=exim4 state=reloaded
