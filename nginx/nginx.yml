@@ -1,0 +1,10 @@
+---
+- hosts: es
+  become: true
+  tasks:
+    - name: ensure nginx is installed
+      apt: name=nginx state=latest update_cache=yes
+
+    - name: ensure service is enabled and started
+      service: name=nginx enabled=yes state=started
+
