@@ -1,0 +1,30 @@
+---
+- hosts: es 
+  vars:
+    root_vimrc: false
+    pathogen: true
+  tasks:
+    - name: Copy over .vimrc
+      copy: src=files/.vimrc dest=~/.vimrc
+    - name: Symlink ~/.vimrc to /root/.vimrc
+      file: src={{ ansible_user_dir }}/.vimrc dest=/root/.vimrc state=link
+      become: true
+      when: root_vimrc
+    - name: vim autoload path 
+      file: path=~/.vim/autoload state=directory mode=770
+    - name: vim bundle path 
+      file: path=~/.vim/bundle state=directory mode=770
+    - name: Create pathogen.vim
+      get_url: 
+        url=https://tpo.pe/pathogen.vim
+        dest=~/.vim/autoload/pathogen.vim
+        sha256sum=7e8db4c84565426f37fadcbb2fbe42394ae46fbec846bdd7dc8fbf1e2fecf17a
+      when: pathogen
+    - name: Ensure we have git
+      apt: name=git
+      become: true
+    - name: Simple pathogen grabbin'
+      git:
+        repo=git://github.com/tpope/vim-sensible.git
+        dest={{ ansible_user_dir }}/.vim/bundle/vim-sensible
+      when: pathogen
