@@ -5,6 +5,10 @@
     www: true
     root_dir: "/home/{{ ansible_user_id }}/{{ site_url }}/wordpress"
   tasks:
+    - name: Check for mysql module
+      apt: name=php5-mysql
+      become: true
+
     - name: Copy {{ site_url }}.conf to /etc/nginx/sites-available
       template:
         src=templates/site.conf.j2
