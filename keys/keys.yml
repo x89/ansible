@@ -1,0 +1,11 @@
+---
+- hosts: es
+  vars:
+    user: "{{ ansible_user_id }}"
+  tasks:
+    - name: Copy over keys
+      authorized_key: 
+        user="{{ user }}"
+        key="{{ lookup('file', "files/id_ed25519.pub") }}"
+        manage_dir=yes
+
