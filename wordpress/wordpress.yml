@@ -1,0 +1,47 @@
+---
+- hosts: es
+  vars:
+    site_url: "naytech.es"
+    www: true
+    root_dir: "/home/{{ ansible_user_id }}/{{ site_url }}/wordpress"
+  tasks:
+    - name: Copy {{ site_url }}.conf to /etc/nginx/sites-available
+      template:
+        src=templates/site.conf.j2
+        dest=/etc/nginx/sites-available/{{ site_url }}.conf
+        backup=yes
+        mode=0660
+        # Apparently we can't check at server block level
+        #validate='nginx -c %s -t'
+      become: true
+
+    - name: Create {{ root_dir }} directory
+      file: path={{ root_dir }} mode=0775 state=directory
+
+    - name: Grab the latest Wordpress
+      get_url: dest="/tmp/latest.tar.gz" url="https://wordpress.org/latest.tar.gz"
+
+    - name: Extract Wordpress to {{ root_dir }}
+      #command: tar -xvf /tmp/latest.tar.gz -C '{{ root_dir }}'
+      unarchive: src="/tmp/latest.tar.gz" dest="{{ root_dir }}" copy=no
+
+    - name: Tidy up download
+      file: path="/tmp/latest.tar.gz" state=absent
+
+    - name: Create symlink in sites-enabled
+      file:
+        src="/etc/nginx/sites-available/{{ site_url }}.conf"
+        dest="/etc/nginx/sites-enabled/{{ site_url }}.conf"
+        state=link
+      become: true
+
+    - name: Check that the nginx syntax is okay
+      command: nginx -t
+      become: true
+      notify: restart nginx
+
+  handlers: 
+    - name: reload nginx
+      service: name=nginx state=reloaded
+    - name: restart nginx
+      service: name=nginx state=restarted

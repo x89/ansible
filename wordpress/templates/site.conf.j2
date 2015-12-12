@@ -1,0 +1,39 @@
+server {
+    listen 80;
+    server_name {{ site_url }}{% if www %} www.{{ site_url }} {% endif %};
+
+    root {{ root_dir }};
+    index index.php;
+    
+    access_log /var/log/{{ site_url }}.access.log;
+    error_log /var/log/{{ site_url }}.error.log;
+
+    rewrite ^/sitemap(-+([a-zA-Z0-9_-]+))?\.xml$ "/index.php?xml_sitemap=params=$2" last;
+    rewrite ^/sitemap(-+([a-zA-Z0-9_-]+))?\.xml\.gz$ "/index.php?xml_sitemap=params=$2;zip=true" last;
+    rewrite ^/sitemap(-+([a-zA-Z0-9_-]+))?\.html$ "/index.php?xml_sitemap=params=$2;html=true" last;
+    rewrite ^/sitemap(-+([a-zA-Z0-9_-]+))?\.html.gz$ "/index.php?xml_sitemap=params=$2;html=true;zip=true" last;
+    
+		{% if ansible_user_gecos == "Ubuntu" %}
+		location ~ \.php$ {
+				fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        # NOTE: You should have "cgi.fix_pathinfo = 0;" in php.ini
+				fastcgi_pass unix:/var/run/php5-fpm.sock;
+				fastcgi_index index.php;
+				include fastcgi_params;
+		}
+
+		{% else %}
+
+    location ~ \.php$ {
+        include /etc/nginx/fastcgi.conf;
+        fastcgi_pass unix:/run/php5-fpm.sock;
+    }
+		{% endif %}
+
+    location / {
+       try_files $uri $uri/ /index.php;
+    }
+
+}
+
+# vim: syntax=nginx.conf
