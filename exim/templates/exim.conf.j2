@@ -26,8 +26,10 @@ disable_ipv6 = true
 # These lists are referred to later in this configuration using the syntax
 # +local_domains, +relay_to_domains, and +relay_from_hosts, respectively. They
 # are all colon-separated lists:
-domainlist local_domains = @ 
-domainlist relay_to_domains = {{ hostname }} : *.{{ hostname }} 
+domainlist local_domains = @{% for domain in other_domains %} : {{ domain }}{% endfor %}
+
+domainlist relay_to_domains = {{ hostname }} : *.{{ hostname }}{% for domain in other_domains %} : {{ domain }}{% endfor %} 
+
 hostlist   relay_from_hosts = localhost {% for h in ansible_all_ipv4_addresses %} : {{ h }}/16{% endfor %}
 
 # domainlist relay_to_domains = *.myco.com : my.friend.org
