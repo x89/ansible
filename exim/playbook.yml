@@ -2,10 +2,11 @@
 - hosts: ro 
   become: true 
   vars:
-    hostname: vaunt.eu
+    hostname: "vaunt.eu"
     tls: true
-    aliases_file: /etc/aliases
+    aliases_file: "/etc/aliases"
     tls_only: false
+    other_domains: ["naytech.es", "trailbeans.eu"]
   tasks:
     - include: 'tasks/main.yml'
   handlers:
