@@ -28,3 +28,11 @@
         repo=git://github.com/tpope/vim-sensible.git
         dest={{ ansible_user_dir }}/.vim/bundle/vim-sensible
       when: pathogen
+    - name: Add a bunch of colour schemes
+      git:
+        repo=https://github.com/upsuper/vim-colorschemes.git
+        dest="{{ ansible_user_dir }}/.vim/bundle/colorschemes"
+    - name: Add Syntastic
+      git:
+        repo=https://github.com/scrooloose/syntastic.git
+        dest="{{ ansible_user_dir }}/.vim/bundle/syntastic"
