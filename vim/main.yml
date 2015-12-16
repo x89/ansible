@@ -1,11 +1,11 @@
 ---
-- hosts: es 
+- hosts: nay 
   vars:
     root_vimrc: false
     pathogen: true
   tasks:
     - name: Copy over .vimrc
-      copy: src=files/.vimrc dest=~/.vimrc
+      copy: src=files/vimrc dest=~/.vimrc
     - name: Symlink ~/.vimrc to /root/.vimrc
       file: src={{ ansible_user_dir }}/.vimrc dest=/root/.vimrc state=link
       become: true
