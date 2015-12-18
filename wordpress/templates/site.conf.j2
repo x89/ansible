@@ -1,39 +1,32 @@
 server {
-    listen 80;
+    # HTTP
+    listen 127.0.0.1:8080; # Varnished to port 80
+
+    # HTTPS
+    listen 10.0.0.138:443 ssl spdy; # Because varnish doesnn't handle HTTPS we bind to the IP the ELB connects to.
     server_name {{ site_url }}{% if www %} www.{{ site_url }} {% endif %};
 
     root {{ root_dir }};
     index index.php;
-    
-    access_log /var/log/{{ site_url }}.access.log;
+
+    access_log /var/log/{{ site_url }}.access.log elb_log if=$is_not_elb;
     error_log /var/log/{{ site_url }}.error.log;
 
-    rewrite ^/sitemap(-+([a-zA-Z0-9_-]+))?\.xml$ "/index.php?xml_sitemap=params=$2" last;
-    rewrite ^/sitemap(-+([a-zA-Z0-9_-]+))?\.xml\.gz$ "/index.php?xml_sitemap=params=$2;zip=true" last;
-    rewrite ^/sitemap(-+([a-zA-Z0-9_-]+))?\.html$ "/index.php?xml_sitemap=params=$2;html=true" last;
-    rewrite ^/sitemap(-+([a-zA-Z0-9_-]+))?\.html.gz$ "/index.php?xml_sitemap=params=$2;html=true;zip=true" last;
-    
-		{% if ansible_user_gecos == "Ubuntu" %}
-		location ~ \.php$ {
-				fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        # NOTE: You should have "cgi.fix_pathinfo = 0;" in php.ini
-				fastcgi_pass unix:/var/run/php5-fpm.sock;
-				fastcgi_index index.php;
-				include fastcgi_params;
-		}
+    ssl_certificate /etc/nginx/ssl/chained.pem;
+    ssl_certificate_key /etc/nginx/ssl/naytech.key;
+    # SSL security options
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+    ssl_session_cache shared:SSL:20m;
+    ssl_session_timeout 10m;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers 'ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DH+3DES:!ADH:!AECDH:!MD5';
 
-		{% else %}
+    # Using fastcgi caching based on WP rules.
+    include global/wp-cache.conf;
 
-    location ~ \.php$ {
-        include /etc/nginx/fastcgi.conf;
-        fastcgi_pass unix:/run/php5-fpm.sock;
-    }
-		{% endif %}
-
-    location / {
-       try_files $uri $uri/ /index.php;
-    }
-
+    # Generic Wordpress options
+    include global/wordpress.conf;
 }
 
 # vim: syntax=nginx.conf

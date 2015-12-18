@@ -1,33 +1,56 @@
 ---
-- hosts: es
+- hosts: "{{ hosts }}"
   vars:
-    site_url: "naytech.es"
+    site_url: "{{ site }}"
     www: true
     root_dir: "/home/{{ ansible_user_id }}/{{ site_url }}/wordpress"
+    group: "www-data"
+    become: true
+
   tasks:
     - name: Check for mysql module
       apt: name=php5-mysql
-      become: true
+
+    - name: Create global directory in /etc/nginx
+      file: path=/etc/nginx/global state=directory mode=750
+
+    - name: Copy over wp-cache.conf
+      copy:
+        src=files/wp-cache.conf
+        dest=/etc/nginx/global/wp-cache.conf
+        mode=640
+        owner=root
+        group={{ group }}
+
+    - name: Copy over wordpress.conf
+      copy:
+        src=files/wordpress.conf
+        dest=/etc/nginx/global/wordpress.conf
+        mode=640
+        owner=root
+        group={{ group }}
 
     - name: Copy {{ site_url }}.conf to /etc/nginx/sites-available
       template:
         src=templates/site.conf.j2
         dest=/etc/nginx/sites-available/{{ site_url }}.conf
         backup=yes
-        mode=0660
+        mode=0640
+      become: true
         # Apparently we can't check at server block level
         #validate='nginx -c %s -t'
-      become: true
 
     - name: Create {{ root_dir }} directory
       file: path={{ root_dir }} mode=0775 state=directory
 
     - name: Grab the latest Wordpress
-      get_url: dest="/tmp/latest.tar.gz" url="https://wordpress.org/latest.tar.gz"
+      get_url: dest='/tmp/latest.tar.gz' url='https://wordpress.org/latest.tar.gz'
 
     - name: Extract Wordpress to {{ root_dir }}
-      #command: tar -xvf /tmp/latest.tar.gz -C '{{ root_dir }}'
       unarchive: src="/tmp/latest.tar.gz" dest="{{ root_dir }}" copy=no
+
+    - name: chmod everything :www-data
+      file: path={{ root_dir }} recurse=yes state=directory group={{ group }}
 
     - name: Tidy up download
       file: path="/tmp/latest.tar.gz" state=absent
@@ -37,15 +60,13 @@
         src="/etc/nginx/sites-available/{{ site_url }}.conf"
         dest="/etc/nginx/sites-enabled/{{ site_url }}.conf"
         state=link
-      become: true
 
-    - name: Check that the nginx syntax is okay
+    - name: Check perms on ssl keys
+      file: path=/etc/nginx/ssl state=directory recurse=yes mode=0400
+
+    - name: Check that the nginx syntax is okay and restart
       command: nginx -t
-      become: true
       notify: restart nginx
 
-  handlers: 
-    - name: reload nginx
-      service: name=nginx state=reloaded
-    - name: restart nginx
-      service: name=nginx state=restarted
+  handlers:
+    - include: handlers/nginx.yml
