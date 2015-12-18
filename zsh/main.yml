@@ -1,30 +1,63 @@
 ---
-- hosts: nay 
+- hosts: "{{ hosts }}"
   vars:
-    zshify_root: false
+    zshify_root: false  # not completed yet
+    locale: en_GB.UTF-8
+    prompt: skwp
+    editor: vim
   tasks:
-    - name: Ensure we have zsh
-      apt: name=zsh
+    - name: Ensure we have zsh (latest)
+      apt: name=zsh state=latest
       become: true
 
     - name: Ensure we have git
-      apt: name=git
+      apt: name=git state=present
       become: true
 
-    - name: We need the en_GB.utf8 locale
+    - name: We need the {{ locale }} locale
       apt: name=language-pack-en
       become: true
 
-    - name: Grab .zprezto to ~/.zp
+    - name: Grab .zprezto to ~/.zprezto
       git:
         repo=https://github.com/sorin-ionescu/prezto.git
-        dest={{ ansible_user_dir }}/.zp
+        dest={{ ansible_user_dir }}/.zprezto
         recursive=true
         update=yes
+        force=yes
 
-    - name: Copy over .zshrc
-      copy: src=files/zshrc dest=~/.zshrc
+    - name: Copy over our .zshrc
+      template: src=templates/zshrc.j2 dest=~/.zshrc mode=640
 
-    - name: Set {{ ansible_user_id }} shell
-      user: name={{ ansible_user_id }} shell=/usr/bin/zsh
+    - name: Copy over improved ~/.zprezto/runcoms/zpreztorc
+      copy: src=files/zpreztorc dest=~/.zpreztorc
+
+  # For if we want to use the official zperztorc
+  #   - name: Symlink ~/.zprezto/runcoms/zpreztorc
+  #     file: src=~/.zprezto/runcoms/zpreztorc dest=~/.zprofile state=link
+
+    - name: Symlink ~/.zprezto/runcoms/zprofile
+      file: src=~/.zprezto/runcoms/zprofile dest=~/.zprofile state=link
+
+    - name: Symlink ~/.zprezto/runcoms/zshenv
+      file: src=~/.zprezto/runcoms/zshenv dest=~/.zshenv state=link
+
+    - name: Symlink ~/.zprezto/runcoms/zlogin
+      file: src=~/.zprezto/runcoms/zlogin dest=~/.zlogin state=link
+
+    - name: Ensure that god damn logout message is dead
+      file: path=~/.zlogout state=absent
+
+    - name: Get the path to zsh so we don't ruin the user's login
+      shell: which zsh
+      register: zsh_path
+
+    - name: Get the current shell
+      shell: echo $SHELL
+      register: cur_shell
+
+    - name: Set {{ ansible_user_id }} shell from {{ cur_shell.stdout }} to zsh 
+      user: name={{ ansible_user_id }} shell={{ zsh_path.stdout }}
       become: true
+      when: cur_shell.stdout != zsh_path.stdout
+
