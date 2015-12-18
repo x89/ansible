@@ -1,0 +1,30 @@
+---
+- hosts: nay 
+  vars:
+    zshify_root: false
+  tasks:
+    - name: Ensure we have zsh
+      apt: name=zsh
+      become: true
+
+    - name: Ensure we have git
+      apt: name=git
+      become: true
+
+    - name: We need the en_GB.utf8 locale
+      apt: name=language-pack-en
+      become: true
+
+    - name: Grab .zprezto to ~/.zp
+      git:
+        repo=https://github.com/sorin-ionescu/prezto.git
+        dest={{ ansible_user_dir }}/.zp
+        recursive=true
+        clone=no
+
+    - name: Copy over .zshrc
+      copy: src=files/zshrc dest=~/.zshrc
+
+    - name: Set {{ ansible_user_id }} shell
+      user: name={{ ansible_user_id }} shell=/usr/bin/zsh
+      become: true

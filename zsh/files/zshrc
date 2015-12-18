@@ -1,0 +1,31 @@
+
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+fi
+if [[ -s "${ZDOTDIR:-$HOME}/.zp/init.zsh" ]]; then
+  source "${ZDOTDIR:-$HOME}/.zp/init.zsh"
+fi
+
+plugins=(cp git history zsh-syntax-highlighting)
+
+setopt inc_append_history share_history
+HIST_IGNORE_ALL_DUPS="true"
+hist_ignore_space="true"
+
+export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+export LANG=en_GB.UTF-8
+
+alias bc='bc -l'
+alias sort="sort -h"
+alias du="du --max-depth=1 -h"
+alias ls='ls -ptr --time-style=long-iso --color=auto'
+
+export LS_COLORS="di=36:ln=93:or=95:ex=92"
+export EDITOR='vim'
+bindkey -e
+
+autoload -U promptinit
+promptinit
+
+prompt skwp 
