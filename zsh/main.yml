@@ -20,7 +20,7 @@
         repo=https://github.com/sorin-ionescu/prezto.git
         dest={{ ansible_user_dir }}/.zp
         recursive=true
-        clone=no
+        update=yes
 
     - name: Copy over .zshrc
       copy: src=files/zshrc dest=~/.zshrc
