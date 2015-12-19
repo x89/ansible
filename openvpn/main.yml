@@ -1,0 +1,19 @@
+---
+- hosts: "{{ hosts }}"
+
+  vars:
+    tuntap: tun
+    port: 5500 
+    proto: udp
+    conf_name: ansible-openvpn.conf
+    key_dir: /etc/openvpn/ssl
+    dh: true
+    ta: true
+
+  tasks:
+    - include: tasks/openvpn_apt.yml
+      when: ansible_pkg_mgr == "apt"
+
+    - include: tasks/keys.yml
+
+    - include: tasks/service.yml

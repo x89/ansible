@@ -1,0 +1,26 @@
+---
+# Copy the files that OpenVPN will use
+
+- name: Check the {{ key_dir }} directory
+  file: path={{ key_dir }} state=directory owner=root group=root mode=0751
+  become: true
+
+- name: Copy the {{ conf_name }} template
+  template:
+    dest=/etc/openvpn/{{ conf_name }}
+    src=templates/server.conf.j2
+    owner=root group=root
+    mode=0600
+  become: true
+
+- name: Copy all our keys over
+  copy: src=files/ dest={{ key_dir }}
+  become: true
+
+- name: Ensure keys are secure
+  file:
+    path={{ key_dir }}
+    recurse=yes 
+    owner=root group=root
+    mode=0600
+  become: true

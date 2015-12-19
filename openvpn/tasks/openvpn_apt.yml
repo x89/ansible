@@ -1,0 +1,16 @@
+---
+# Ensure OpenVPN is installed, latest and the directories are correct
+# This is for redhat-like (apt) systems.
+
+- name: apt-get update
+  apt: update_cache=yes
+  become: true
+
+- name: Ensure OpenVPN is installed 
+  apt: name=openvpn state=latest
+  become: true
+
+- name: Check /etc/openvpn exists
+  file: path=/etc/openvpn mode=750 owner=root group=root
+  become: true
+

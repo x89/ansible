@@ -1,0 +1,5 @@
+---
+# Start our OpenVPN service running the new config.
+
+- name: Start OpenVPN
+  service: name=openvpn enabled=yes state=restarted
