@@ -3,7 +3,7 @@
 
   vars:
     tuntap: tun
-    port: 5500 
+    port: 5500
     proto: udp
     conf_name: ansible-openvpn.conf
     key_dir: /etc/openvpn/ssl

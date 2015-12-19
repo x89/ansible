@@ -14,13 +14,27 @@
   become: true
 
 - name: Copy all our keys over
-  copy: src=files/ dest={{ key_dir }}
+  copy: src=files/{{ item }} dest={{ key_dir }}
+  with_items:
+    - ca.crt
+    - server.crt
+    - server.key
+  become: true
+
+- name: Copy dh
+  copy: src=files/dh2048.pem dest={{ key_dir }}
+  when: dh
+  become: true
+
+- name: Copy ta
+  copy: src=files/ta.key dest={{ key_dir }}
+  when: ta
   become: true
 
 - name: Ensure keys are secure
   file:
     path={{ key_dir }}
-    recurse=yes 
+    recurse=yes
     owner=root group=root
     mode=0600
   become: true
