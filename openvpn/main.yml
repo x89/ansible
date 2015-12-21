@@ -15,5 +15,5 @@
       when: ansible_pkg_mgr == "apt"
 
     - include: tasks/keys.yml
-
+    - include: tasks/linux_fw.yml
     - include: tasks/service.yml
