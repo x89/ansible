@@ -1,0 +1,8 @@
+---
+# Exim4 handlers
+
+- name: restart exim
+  service: name=exim state=restarted
+
+- name: reload exim
+  service: name=exim state=reloaded
