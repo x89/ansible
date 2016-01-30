@@ -1,6 +1,8 @@
 ---
 - hosts: es
+
   become: true
+
   tasks:
     - name: ensure nginx is installed
       apt: name=nginx state=latest update_cache=yes

@@ -1,0 +1,7 @@
+---
+- hosts: ro
+  vars:
+    user: napalm
+  tasks:
+    - name: Wordpress update check
+    cron: user="napalm" name="Ansible Wordpress update check" minute="2" job="/home/{{ user }}/wp-cli/wp --path=/home/{{ user }}/blog core check-update"

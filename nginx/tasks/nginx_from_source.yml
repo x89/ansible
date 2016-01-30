@@ -1,0 +1,14 @@
+---
+# Often we don't have access to all the features we would like in our distro
+# so we have to compile the latest nginx with more features!
+
+- name: We need mercurial
+  pacman: name=mercurial state=present
+
+- name: Check nginx somewhere
+  hg:
+    dest=/tmp/nginx_source
+    repo=http://hg.nginx.org/nginx
+
+
+
