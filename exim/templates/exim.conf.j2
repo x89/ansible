@@ -20,7 +20,7 @@
 #                    MAIN CONFIGURATION SETTINGS                     #
 ######################################################################
 
-primary_hostname = {{ hostname }} 
+primary_hostname = {{ hostname }}
 disable_ipv6 = true
 
 # These lists are referred to later in this configuration using the syntax
@@ -28,7 +28,7 @@ disable_ipv6 = true
 # are all colon-separated lists:
 domainlist local_domains = @{% for domain in other_domains %} : {{ domain }}{% endfor %}
 
-domainlist relay_to_domains = {{ hostname }} : *.{{ hostname }}{% for domain in other_domains %} : {{ domain }}{% endfor %} 
+domainlist relay_to_domains = {{ hostname }} : *.{{ hostname }}{% for domain in other_domains %} : {{ domain }}{% endfor %}
 
 hostlist   relay_from_hosts = localhost {% for h in ansible_all_ipv4_addresses %} : {{ h }}/16{% endfor %}
 
@@ -59,7 +59,7 @@ tls_privatekey = /etc/exim4/keys/exim.key
 
 daemon_smtp_ports = 25
 
-qualify_domain = {{ hostname }} 
+qualify_domain = {{ hostname }}
 qualify_recipient = {{ hostname }}
 
 never_users = root
@@ -317,6 +317,11 @@ remote_smtp:
   {% if tls_only %}
   hosts_require_tls = *
   {% endif %}
+  {% if domainkey %}
+  dkim_domain = {{ hostname }}
+  dkim_selector = "mail"
+  dkim_private_key = /etc/exim4/keys/dkim.private.key
+  {% endif %}
 
 local_delivery:
   driver = appendfile
@@ -325,7 +330,7 @@ local_delivery:
   envelope_to_add
   return_path_add
   # create_directory
-  group = mail 
+  group = mail
   mode = 0640
 
 

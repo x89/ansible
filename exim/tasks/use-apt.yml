@@ -1,5 +1,12 @@
-- name: ensure Exim is present
-  apt: name=exim4 state=present
+---
+# Tasks to install Exim on Apt based systems
+
+- name: Install our required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - exim4
+    - opendkim
+    - opendkim-tools
 
 - name: ensure Exim is enabled and started
   service: name=exim4 enabled=yes state=started
@@ -7,20 +14,30 @@
 - name: Update config
   template: src=templates/exim.conf.j2 dest=/etc/exim4/exim4.conf
 
-- name: Check that exim config passes syntax test 
+- name: Check that exim config passes syntax test
   command: exim -bV
+  register: exim_valid_syntax
 
 - name: Correct perms on /etc/exim4
   file: path=/etc/exim4 state=directory owner=root group=root recurse=yes
 
-- name: Correct exim.crt permission
-  file: path=/etc/exim4/keys/exim.crt state=file owner=Debian-exim group=root mode=0400
+- name: Exim4/keys dir permission
+  file:
+    path=/etc/exim4/keys/
+    state=directory
+    owner=root
+    group=root
+    mode=0711
 
-- name: Correct exim.key permission
-  file: path=/etc/exim4/keys/exim.key state=file owner=Debian-exim group=root mode=0400
+- name: Copy TLS keys
+  copy: src={{ item }} dest=/etc/exim4/keys owner=root group=Debian-exim mode=0640
+  with_items:
+    - exim.crt
+    - exim.key
+    - dkim.private.key
+    - dkim.public.key
+  notify: "restart exim"
 
 - name: Copy newest aliases file
   copy: src=files/aliases dest={{ aliases_file }} mode=0640 owner=Debian-exim
-
-- name: Reload exim
-  service: name=exim4 state=reloaded
+  notify: "reload exim"

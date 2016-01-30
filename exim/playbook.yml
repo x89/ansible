@@ -1,13 +1,14 @@
 ---
-- hosts: ro 
-  become: true 
+- hosts: mail
+  become: true
   vars:
-    hostname: "vaunt.eu"
+    hostname: "mail.vaunt.eu"
     tls: true
     aliases_file: "/etc/aliases"
     tls_only: false
-    other_domains: ["naytech.es", "trailbeans.eu"]
-  tasks:
-    - include: 'tasks/main.yml'
+    other_domains: ["vaunt.eu", "naytech.es", "trailbeans.eu"]
+    domainkey: true
   handlers:
     - include: 'handlers/main.yml'
+  tasks:
+    - include: 'tasks/main.yml'
