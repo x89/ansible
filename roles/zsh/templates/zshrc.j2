@@ -1,0 +1,29 @@
+# zshrc from https://github.com/x89/ansible/blob/master/zsh/files/zshrc
+
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+fi
+
+plugins=(cp git history zsh-syntax-highlighting)
+
+setopt inc_append_history share_history
+HIST_IGNORE_ALL_DUPS="true"
+HIST_IGNORE_SPACE="true"
+
+alias bc='bc -l'
+alias du="du --max-depth=1 -h"
+alias ls='ls -ptr --time-style=long-iso --color=auto'
+alias sort="sort -h"
+
+bindkey -e
+
+autoload -U promptinit
+promptinit
+
+prompt "{{ prompt }}"
+
+export EDITOR="{{ editor }}"
+export LANG="{{ locale }}"
+export LS_COLORS="di=36:ln=93:or=95:ex=92"
+export PATH=$HOME/bin:$PATH
+
